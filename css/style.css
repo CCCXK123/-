@@ -206,7 +206,8 @@ p{margin:0 0 .8em}
   font-weight:750;font-variant-numeric:tabular-nums;transition:.1s;color:var(--text);
 }
 .cell:hover{border-color:var(--primary);background:var(--primary-soft)}
-.cell.done{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);opacity:.62}
+/* 点过的格子保持原样不变色：仅取消指针光标，避免视觉干扰、方便继续找下一个 */
+.cell.done:hover{border-color:var(--border);background:var(--surface2)}
 .cell.err{background:var(--danger-soft);border-color:var(--danger);animation:shake .3s}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 

@@ -227,6 +227,30 @@
     map['9'].click();
     assert(parseInt(hud(3), 10) === 1, '失误计数异常: ' + hud(3));
   });
+  T('舒尔特 点过的格子不变色（仅标记 done，视觉保持原样）', function () {
+    // 重新开局，保证处于运行中且 next=1
+    var lvs = document.querySelectorAll('.levelrow .lv');
+    lvs[0].click();                       // 切到 3×3，会重建方格并弹说明
+    var b = findBtn(/开始训练/); assert(b, '找不到开始按钮'); b.click();
+    var cells = document.querySelectorAll('.schulte-grid .cell');
+    var map = {};
+    Array.prototype.forEach.call(cells, function (c) { map[c.textContent.trim()] = c; });
+    var c1 = map['1'], c2 = map['2'];
+    assert(c1 && c2, '缺少数字格');
+    var bgBefore = getComputedStyle(c1).backgroundColor;
+    var colBefore = getComputedStyle(c1).color;
+    c1.click();
+    assert(c1.classList.contains('done'), '正确点击未标记 done');
+    var bgAfter = getComputedStyle(c1).backgroundColor;
+    var colAfter = getComputedStyle(c1).color;
+    assert(bgBefore === bgAfter, '点后背景色变了: ' + bgBefore + ' → ' + bgAfter);
+    assert(colBefore === colAfter, '点后文字色变了: ' + colBefore + ' → ' + colAfter);
+    // 与未点过的格子对比，样式应完全一致（不再用视觉区分已点/未点）
+    assert(getComputedStyle(c1).backgroundColor === getComputedStyle(c2).backgroundColor,
+      '点过的格子与未点格子背景不一致（仍在视觉上区分）');
+    assert(getComputedStyle(c1).color === getComputedStyle(c2).color,
+      '点过的格子与未点格子文字色不一致（仍在视觉上区分）');
+  });
   T('舒尔特 切难度到 6×6 → 36 格', function () {
     var lvs = document.querySelectorAll('.levelrow .lv');
     lvs[3].click();
