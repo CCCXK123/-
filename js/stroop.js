@@ -27,9 +27,10 @@
 
     wrap.appendChild(el('div', 'game-top', [
       '<div><h1>🎨 Stroop 色词干扰</h1>',
-      '<p class="desc">屏幕中央会出现一个<b>表示颜色的字</b>，但它的<b>墨色和字义不一样</b>（比如「红」字被涂成蓝色）。' +
-      '你要<b>忽略字义、只按墨色</b>作答。这正是抑制控制最经典的测量方式：大脑自动读字，你必须把这个自动化反应压下去。' +
-      '<b>大师档会反转规则</b>，请按提示作答。</p></div>'
+      '<p class="desc">屏幕中央会出现一个<b>表示颜色的字</b>，但它的<b>墨色和字义常常不一样</b>（比如「红」字被涂成蓝色）。' +
+      '你要<b>忽略字义、只按墨色</b>作答（点下方色块或按数字键 1–4）。' +
+      '每题有限时（1.6–2.5 秒），超时算错。这正是抑制控制最经典的测量方式：大脑自动读字，你必须把这个自动化反应压下去。' +
+      '<b>大师档会反转规则</b>，请按顶部提示作答。</p></div>'
     ].join('')));
 
     var lvRow = el('div', 'levelrow');
@@ -53,7 +54,8 @@
 
     var L = LEVELS[0];
     var st = null;
-    var tNext = null, tLimit = null, tCount = null;
+    var tNext = null, tLimit = null, tCount = null, tFlash = null;
+    var alive = true;
     var keyHandler = null;
 
     /* --- 颜色按钮 --- */
@@ -96,7 +98,9 @@
         if (Math.random() < L.congruent) {
           word = ink;
         } else {
-          do { word = COLORS[UI.randInt(4)]; } while (word.key === ink.key);
+          var guard = 0;
+          do { word = COLORS[UI.randInt(4)]; guard++; } while (word.key === ink.key && guard < 50);
+          if (word.key === ink.key) word = COLORS[(COLORS.indexOf(ink) + 1) % COLORS.length];
         }
         q.push({ ink: ink, word: word, congruent: ink.key === word.key });
       }
@@ -133,7 +137,8 @@
       wordBox.style.opacity = '.35';
       wordBox.textContent = text;
       wordBox.style.color = color;
-      setTimeout(function () {
+      clearTimeout(tFlash);
+      tFlash = setTimeout(function () {
         wordBox.style.opacity = '1';
       }, 260);
     }
@@ -159,7 +164,8 @@
     }
 
     function nextAfter() {
-      setTimeout(function () {
+      clearTimeout(tNext);
+      tNext = setTimeout(function () {
         if (!st || !st.running) return;
         st.i++;
         wordBox.style.transition = 'opacity .12s';
@@ -170,7 +176,7 @@
 
     function finish() {
       st.running = false;
-      clearTimeout(tLimit); clearTimeout(tNext);
+      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tFlash);
       var total = st.correct + st.wrong + st.timeout;
       var acc = UI.pct(st.correct, total);
       var allRt = st.rts.map(function (x) { return x.rt; });
@@ -222,14 +228,17 @@
     }
 
     function begin() {
-      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount);
-      st = { running: false, i: 0, correct: 0, wrong: 0, timeout: 0, rts: [], queue: buildQueue() };
+      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount); clearTimeout(tFlash);
+      var mine = { running: false, i: 0, correct: 0, wrong: 0, timeout: 0, rts: [], queue: buildQueue() };
+      st = mine;
       wordBox.textContent = '准备';
       wordBox.style.color = 'var(--muted)';
       overlay.classList.add('hidden');
       updateHud();
       var n = 3;
       (function cd() {
+        // 离开页面或已切到新一轮时，旧倒计时立即失效
+        if (!alive || st !== mine) return;
         if (n > 0) {
           wordBox.textContent = String(n);
           wordBox.style.color = 'var(--primary)';
@@ -243,7 +252,7 @@
     }
 
     function showIntro(msg) {
-      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount);
+      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount); clearTimeout(tFlash);
       if (st) st.running = false;
       wordBox.textContent = '示例';
       wordBox.style.color = '#1971c2';
@@ -262,7 +271,9 @@
         ],
         verdict: msg || (L.rule === 'ink'
           ? '看到字后，<b>只按它的颜色</b>点下方对应按钮，别管写的是什么字。'
-          : '<b>注意：本档规则反转。</b>看到字后，按<b>它写的是什么颜色</b>点按钮，忽略字体被涂成什么颜色。'),
+          : '<b>注意：本档规则反转。</b>看到字后，按<b>它写的是什么颜色</b>点按钮，忽略字体被涂成什么颜色。') +
+          '<br><b>计分：</b>正确率 = 答对 ÷（答对 + 答错 + 超时），共 ' + L.trials + ' 题，单题限时 ' + (L.limit / 1000).toFixed(1) + 's。' +
+          (L.congruent === 0 ? '<br>本档<b>全部为冲突题</b>（墨色与字义都不同），因此不计算「冲突代价」。' : ''),
         actions: [{ label: '开始训练', cls: 'ok', fn: begin }]
       }));
     }
@@ -273,7 +284,7 @@
         var b = el('button', 'lv' + (lv.id === L.id ? ' on' : ''), lv.name + '<small>' + lv.hint + '</small>');
         b.style.lineHeight = '1.25';
         on(b, 'click', function () {
-          L = lv; clearTimeout(tLimit); clearTimeout(tCount);
+          L = lv; clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount); clearTimeout(tFlash);
           if (st) st.running = false;
           renderLevels(); showIntro();
         });
@@ -293,7 +304,7 @@
       if (!st || !st.running) return;
       if (document.hidden) {
         st.running = false;
-        clearTimeout(tLimit);
+        clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount); clearTimeout(tFlash);
         UI.clear(overlay);
         overlay.classList.remove('hidden');
         overlay.appendChild(UI.resultPanel({
@@ -314,7 +325,8 @@
     showIntro();
 
     return function cleanup() {
-      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount);
+      alive = false;
+      clearTimeout(tLimit); clearTimeout(tNext); clearTimeout(tCount); clearTimeout(tFlash);
       if (st) st.running = false;
       document.removeEventListener('keydown', keyHandler);
       document.removeEventListener('visibilitychange', onVis);

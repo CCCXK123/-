@@ -329,7 +329,17 @@
     var b = findBtn(/开始训练/); assert(b, '找不到开始'); b.click();
     await sleep(2500);
     var arena = document.querySelector('.gn-arena');
+    var seen = {};
     var tick = setInterval(function () {
+      // 顺带采样刺激颜色 class，并与实际背景色对照
+      var sh = document.querySelector('.gn-shape');
+      if (sh) {
+        if (sh.classList.contains('go')) seen.go = (seen.go || 0) + 1;
+        if (sh.classList.contains('nogo')) seen.nogo = (seen.nogo || 0) + 1;
+        if ((sh.classList.contains('go') || sh.classList.contains('nogo')) && !seen.bg) {
+          seen.bg = getComputedStyle(sh).backgroundColor;
+        }
+      }
       arena.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true }));
     }, 260);
     var ok = await waitFor(function () { return stat('冲动错误') !== null && /冲动错误率/.test(ovText()); }, 70000, 400);
@@ -339,6 +349,10 @@
            ' / 漏报 ' + stat('漏报') + ' / 冲动错误 ' + stat('冲动错误') + ' / 忍住 ' + stat('成功忍住'));
     assert(stat('总正确率') !== null, '缺总正确率');
     assert(/冲动错误率/.test(ovText()), '缺冲动错误率指标');
+    // 刺激必须真的带颜色：go=绿、nogo=红（此前 bug 会导致 Go 刺激无色）
+    assert(seen.go && seen.nogo, '未同时观察到 go / nogo 刺激');
+    assert(seen.bg && seen.bg !== 'rgba(0, 0, 0, 0)', 'go/nogo 刺激缺少背景色: ' + seen.bg);
+    R.push('INFO | Go/No-Go 刺激采样 go=' + seen.go + ' nogo=' + seen.nogo + ' bg=' + seen.bg);
   });
 
   /* ---------- 10. 记录与清理 ---------- */

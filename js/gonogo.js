@@ -19,9 +19,10 @@
 
     wrap.appendChild(el('div', 'game-top', [
       '<div><h1>🚦 Go / No-Go 反应抑制</h1>',
-      '<p class="desc">屏幕中央会随机出现圆点。<b>看到绿色就尽快点击（或按空格）</b>，<b>看到红色就什么都不做</b>。' +
+      '<p class="desc">屏幕中央会随机出现圆点，每个试次有 <b>0.75–1.0 秒</b>的反应窗口（随难度缩短）。' +
+      '<b>看到绿色就尽快点击（或按空格）</b>，<b>看到红色就什么都不做</b>。' +
       '红色出现的瞬间想点又忍住了，这个「忍住」的过程就是前额叶在做功。' +
-      '按红灯等于记录一次<b>冲动错误</b>。<b>大师档规则反转。</b></p></div>'
+      '按红灯等于记录一次<b>冲动错误</b>。<b>大师档规则反转：红点该点、绿点该忍</b>（颜色与提示文字会自动对调）。</p></div>'
     ].join('')));
 
     var lvRow = el('div', 'levelrow');
@@ -48,9 +49,9 @@
     var L = LEVELS[0];
     var st = null;
     var tStep = null, tWin = null, tCount = null;
+    var alive = true;
     var keyHandler = null;
 
-    function goColor() { return L.reversed ? 'red' : 'green'; }
     function ruleText() {
       return L.reversed
         ? '<b style="color:#e03131">规则反转：红色 = 点！绿色 = 忍住！</b>'
@@ -102,8 +103,10 @@
         st.curIsGo = isGo;
         st.responded = false;
         st.start = performance.now();
-        setShape(isGo ? goColor() : (goColor() === 'green' ? 'nogo' : 'go'),
-          isGo ? (L.reversed ? '点我' : '点我') : '别点');
+        // class 决定刺激颜色（go=绿点 / nogo=红点），与「该不该点」解耦：
+        // 常规档 绿点该点；反向档 红点该点（颜色对调）
+        var showGreen = L.reversed ? !isGo : isGo;
+        setShape(showGreen ? 'go' : 'nogo', isGo ? '点我' : '别点');
         shape.classList.add('pop');
         updateHud();
 
@@ -155,8 +158,10 @@
 
       var mv = '';
       if (st.commission > 4) mv = '你的<b>冲动错误偏多（' + st.commission + ' 次）</b>，说明看到刺激时有「先按了再说」的倾向。这是最能被训练的部分：试着在心里默念「看清楚颜色再决定」。';
-      else if (st.miss > 4) mv = '你的<b>漏报偏多（' + st.miss + ' 次）</b>，说明反应偏保守或注意力有飘移。可以尝试在绿灯亮起前保持轻度的预备状态。';
+      else if (st.miss > 4) mv = '你的<b>漏报偏多（' + st.miss + ' 次）</b>，说明反应偏保守或注意力有飘移。可以尝试在「该点」的刺激亮起前保持轻度的预备状态。';
       else mv = '冲动错误与漏报控制得比较均衡，抑制与反应之间的取舍做得不错。';
+
+      var noGoWord = L.reversed ? '绿点' : '红点';
 
       UI.clear(overlay);
       overlay.classList.remove('hidden');
@@ -171,7 +176,7 @@
           { label: '成功忍住', value: st.cr, cls: 'g' },
           { label: 'Go 平均反应时', value: avgRt ? Math.round(avgRt) + 'ms' : '—' }
         ],
-        verdict: '<b>' + grade + '</b><br>' + mv + '<br>其中<b>冲动错误率</b>（红灯误按 / 红灯总数）= <b>' + impulsivity + '%</b>，这个数字越低，说明反应抑制能力越强。',
+        verdict: '<b>' + grade + '</b><br>' + mv + '<br>其中<b>冲动错误率</b>（' + noGoWord + '误按 / ' + noGoWord + '总数）= <b>' + impulsivity + '%</b>，这个数字越低，说明反应抑制能力越强。',
         actions: [
           { label: '再来一轮', cls: 'ok', fn: begin },
           { label: '换难度', cls: 'sec', fn: function () { UI.clear(overlay); overlay.classList.add('hidden'); showIntro(); } },
@@ -182,11 +187,14 @@
 
     function begin() {
       clearTimeout(tStep); clearTimeout(tWin); clearTimeout(tCount);
-      st = { running: false, i: 0, hit: 0, miss: 0, commission: 0, cr: 0, rt: [], queue: buildQueue(), start: 0, responded: false, curIsGo: false };
+      var mine = { running: false, i: 0, hit: 0, miss: 0, commission: 0, cr: 0, rt: [], queue: buildQueue(), start: 0, responded: false, curIsGo: false };
+      st = mine;
       overlay.classList.add('hidden');
       updateHud();
       var n = 3;
       (function cd() {
+        // 离开页面或已切到新一轮时，旧倒计时立即失效
+        if (!alive || st !== mine) return;
         if (n > 0) {
           setShape('idle', String(n));
           n--;
@@ -217,7 +225,9 @@
         ],
         verdict: msg || (L.reversed
           ? '<b style="color:#e03131">本档规则反转：看到红色要立刻点，看到绿色要忍住。</b>'
-          : '看到<b style="color:#0ca678">绿色</b>尽快点击（或按空格），看到<b style="color:#e03131">红色</b>什么都不做。'),
+          : '看到<b style="color:#0ca678">绿色</b>尽快点击（或按空格），看到<b style="color:#e03131">红色</b>什么都不做。') +
+          '<br><b>计分：</b>总正确率 =（命中 + 成功忍住）÷ 共 ' + L.trials + ' 个试次，反应窗口 ' + (L.win / 1000).toFixed(2) + 's。' +
+          '<br>另有<b>冲动错误率</b> = 该忍的刺激被误按次数 ÷ 该类刺激总数，越低越好。',
         actions: [{ label: '开始训练', cls: 'ok', fn: begin }]
       }));
     }
@@ -270,6 +280,7 @@
     showIntro();
 
     return function cleanup() {
+      alive = false;
       clearTimeout(tStep); clearTimeout(tWin); clearTimeout(tCount);
       if (st) st.running = false;
       document.removeEventListener('keydown', keyHandler);

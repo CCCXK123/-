@@ -176,6 +176,7 @@ p{margin:0 0 .8em}
 .btn.warn{background:var(--warn);box-shadow:0 4px 14px rgba(232,89,12,.26)}
 .btn.ok{background:var(--accent);box-shadow:0 4px 14px rgba(12,166,120,.26)}
 .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.btn.pop{transform:scale(.96);filter:brightness(1.08)}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* ---------- 遮罩面板 ---------- */

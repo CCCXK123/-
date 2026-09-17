@@ -38,8 +38,10 @@
 
     wrap.appendChild(el('div', 'game-top', [
       '<div><h1>🧮 N-back 工作记忆</h1>',
-      '<p class="desc">刺激会一个一个出现。如果<b>当前这个和 N 步之前那个相同</b>，就立刻按「相同」；否则什么都不用做。' +
-      '这是认知神经科学里最常用的工作记忆更新范式。请忍住「不确定就按一下」的冲动——误报会直接扣准确率。</p></div>'
+      '<p class="desc">刺激会一个一个出现，每个停留 <b>1.4–2.0 秒</b>（随难度变长），间隔 <b>0.65–0.8 秒</b>。' +
+      '如果<b>当前这个和 N 步之前那个相同</b>，就立刻按「相同」（或敲空格）；' +
+      '不同则什么都不做——此时按了算<b>误报</b>。开局 N 个刺激用于建立记忆，<b>不计分</b>。' +
+      '准确率 =（命中 + 正确忍住）÷ 全部计分刺激，所以误报和漏报都会直接拉低准确率。</p></div>'
     ].join('')));
 
     var lvRow = el('div', 'levelrow');
@@ -71,7 +73,7 @@
     var L = LEVELS[0];
     var st = null;
     var seq = null;
-    var tShow = null, tNext = null, tCount = null;
+    var tShow = null, tEval = null, tNext = null, tCount = null;
     var alive = true;
     var keyHandler = null;
 
@@ -133,7 +135,7 @@
     }
 
     function evaluate(i) {
-      if (i < L.n) { st.scored = 0; return; }
+      if (i < L.n) return;                 // 开局用于建立记忆的刺激，不计分
       var isMatch = seq[i] === seq[i - L.n];
       if (isMatch && st.responded) { st.hits++; feedback.innerHTML = '<span style="color:var(--accent)">✓ 正确命中</span>'; }
       else if (isMatch && !st.responded) { st.miss++; feedback.innerHTML = '<span style="color:var(--danger)">✗ 漏报：这里应该按「相同」</span>'; }
@@ -153,10 +155,12 @@
       btnYes.disabled = false;
       updateHud();
 
+      var idx = st.curIdx;                   // 捕获本试次序号，避免回调读到已变化的 curIdx
       tShow = setTimeout(function () { clearStim(); }, L.vis);
-      tNext = setTimeout(function () {
-        evaluate(st.curIdx);
-        tShow = setTimeout(function () { nextTrial(); }, L.isi);
+      tEval = setTimeout(function () {
+        if (!alive || !st || !st.running) return;
+        evaluate(idx);
+        tNext = setTimeout(function () { nextTrial(); }, L.isi);
       }, L.vis);
     }
 
@@ -187,6 +191,7 @@
       stopAll();
       var scored = L.trials - L.n;
       var correct = st.hits + st.cr;
+      // 分母用实际完成的计分试次数（异常中断时 scored 可能小于理论值）
       var acc = UI.pct(correct, st.scored || scored);
       var avgRt = st.rt.length ? st.rt.reduce(function (a, b) { return a + b; }, 0) / st.rt.length : 0;
 
@@ -202,14 +207,15 @@
       else if (acc >= 70) { grade = '一般 — 属于大多数人的区间，继续练同一档'; cls = ''; }
       else { grade = '偏弱 — 建议先降到低一档，把准确率稳定在 85% 以上再升'; cls = 'r'; }
 
+      var target = st.hits + st.miss;        // 本次实际出现的匹配目标数
       UI.clear(overlay);
       overlay.classList.remove('hidden');
       overlay.appendChild(UI.resultPanel({
         title: 'N-back 完成 · ' + L.n + '-back',
-        sub: '本次共 ' + scored + ' 个计分刺激',
+        sub: '本次共 ' + (st.scored || scored) + ' 个计分刺激',
         stats: [
           { label: '准确率', value: acc + '%', cls: cls },
-          { label: '命中 / 目标', value: st.hits + ' / ' + st.hits + st.miss, cls: 'g' },
+          { label: '命中 / 目标', value: st.hits + ' / ' + target, cls: 'g' },
           { label: '漏报', value: st.miss, cls: st.miss ? 'r' : '' },
           { label: '误报', value: st.fa, cls: st.fa ? 'r' : '' },
           { label: '平均反应时', value: avgRt ? Math.round(avgRt) + 'ms' : '—' }
@@ -224,8 +230,8 @@
     }
 
     function stopAll() {
-      clearTimeout(tShow); clearTimeout(tNext); clearTimeout(tCount);
-      tShow = tNext = tCount = null;
+      clearTimeout(tShow); clearTimeout(tEval); clearTimeout(tNext); clearTimeout(tCount);
+      tShow = tEval = tNext = tCount = null;
     }
 
     function begin() {
@@ -255,7 +261,8 @@
         verdict: msg || (L.mode === 'spatial'
           ? '记住每个光点出现的<b>位置</b>。当它与 <b>' + L.n + ' 步前</b>的位置相同时，按「相同」。'
           : '记住每个<b>字母</b>。当它与 <b>' + L.n + ' 步前</b>的字母相同时，按「相同」。') +
-          '<br>开局 ' + L.n + ' 个刺激用于建立记忆，不计分。',
+          '<br>开局 ' + L.n + ' 个刺激用于建立记忆，不计分。' +
+          '<br><b>计分：</b>准确率 =（命中 + 正确忍住）÷ 共 ' + (L.trials - L.n) + ' 个计分刺激；漏报与误报都会扣分。',
         actions: [{ label: '开始训练', cls: 'ok', fn: begin }]
       }));
     }

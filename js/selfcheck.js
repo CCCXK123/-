@@ -15,11 +15,13 @@
 
     wrap.appendChild(el('div', 'game-top', [
       '<div><h1>📝 执行功能自评</h1>',
-      '<p class="desc">共 16 题，请按<b>过去一个月</b>的实际情况作答，凭第一反应选，不要反复权衡。' +
-      '测完会给出 4 个维度的得分，帮你定位「最该练哪一块」。</p></div>'
+      '<p class="desc">共 16 题（4 个维度 × 4 题），请按<b>过去一个月</b>的实际情况作答，凭第一反应选，不要反复权衡。' +
+      '每题 1–5 分，<b>总分 16–80 分</b>，每个维度满分 20 分。' +
+      '测完会给出 4 个维度的得分，帮你定位「最该练哪一块」。<b>非诊断工具。</b></p></div>'
     ].join('')));
 
     var answers = {};
+    var resultHost = null;
     var body = el('div');
     wrap.appendChild(body);
 
@@ -77,26 +79,29 @@
       row.style.justifyContent = 'center';
       var submit = el('button', 'btn', '查看结果');
       submit.disabled = true;
-      on(submit, 'click', function () { showResult(submit); });
+      on(submit, 'click', showResult);
       var reset = el('button', 'btn sec', '重置');
       on(reset, 'click', function () { answers = {}; render(); });
       row.appendChild(submit);
       row.appendChild(reset);
       body.appendChild(row);
 
-      var res = el('div');
-      res.id = 'scResult';
-      body.appendChild(res);
+    var res = el('div');
+    res.id = 'scResult';
+    body.appendChild(res);
 
-      function updateProgress() {
-        var n = Object.keys(answers).length;
-        prog.textContent = '已作答 ' + n + ' / ' + C.items.length + ' 题';
-        submit.disabled = n < C.items.length;
-      }
-      updateProgress();
+    function updateProgress() {
+      var n = Object.keys(answers).length;
+      prog.textContent = '已作答 ' + n + ' / ' + C.items.length + ' 题';
+      submit.disabled = n < C.items.length;
     }
+    updateProgress();
 
-    function showResult(btn) {
+    // 把结果容器暴露给 showResult，避免再走 getElementById
+    resultHost = res;
+  }
+
+    function showResult() {
       var dimScores = {};
       C.dims.forEach(function (d) { dimScores[d.key] = 0; });
       var total = 0;
@@ -165,7 +170,8 @@
 
       html.push('<div class="note"><b>重要声明</b><br>' + C.disclaimer + '</div>');
 
-      var out = document.getElementById('scResult');
+      var out = resultHost;
+      if (!out) return;
       out.innerHTML = html.join('');
       out.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
