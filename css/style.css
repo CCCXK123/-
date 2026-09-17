@@ -180,11 +180,21 @@ p{margin:0 0 .8em}
 .btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 
 /* ---------- 遮罩面板 ---------- */
+/* 说明 / 结果面板。内容量可能远大于游戏区（尤其说明页），
+   因此遮罩显示时让 stage 内其余内容让位、面板按正常流排版，
+   面板高度随内容自适应，不会溢出或压住上方元素。 */
 .overlay{
-  position:absolute;inset:14px;border-radius:12px;
+  border-radius:12px;
   background:rgba(248,250,253,.93);backdrop-filter:blur(6px);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   text-align:center;padding:26px;gap:12px;z-index:5;
+  min-height:220px;
+}
+/* 遮罩可见时：stage 内其他子元素（canvas / 刺激区 / 提示）不参与排版 */
+.stage:has(> .overlay:not(.hidden)) > *:not(.overlay){display:none}
+/* 无 :has() 支持时退化为绝对覆盖，至少不会破坏布局 */
+@supports not selector(:has(*)){
+  .overlay{position:absolute;inset:14px;overflow-y:auto;overscroll-behavior:contain}
 }
 .overlay.hidden{display:none}
 .overlay h3{font-size:19px;margin:0}

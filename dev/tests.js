@@ -354,6 +354,26 @@
     assert(seen.bg && seen.bg !== 'rgba(0, 0, 0, 0)', 'go/nogo 刺激缺少背景色: ' + seen.bg);
     R.push('INFO | Go/No-Go 刺激采样 go=' + seen.go + ' nogo=' + seen.nogo + ' bg=' + seen.bg);
   });
+  await TA('各模块说明面板不溢出、无需滚动（遮罩排版）', async function () {
+    // 游戏区越矮、说明越长越容易溢出，因此逐模块核对
+    var ids = ['schulte', 'nback', 'stroop', 'gonogo'];
+    for (var i = 0; i < ids.length; i++) {
+      await go('#/' + ids[i]);
+      await sleep(320);
+      var ov = document.querySelector('.stage .overlay');
+      assert(ov, ids[i] + ' 缺遮罩面板');
+      var sr = document.querySelector('.stage').getBoundingClientRect();
+      var r = ov.getBoundingClientRect();
+      assert(r.bottom <= sr.bottom + 2,
+        ids[i] + ' 面板溢出 stage 下边界 ' + Math.round(r.bottom - sr.bottom) + 'px');
+      assert(ov.scrollHeight <= ov.clientHeight + 2,
+        ids[i] + ' 面板内容被裁切: scrollH=' + ov.scrollHeight + ' clientH=' + ov.clientHeight);
+      var btn = findBtn(/开始训练/);
+      assert(btn, ids[i] + ' 找不到开始训练按钮');
+      assert(btn.getBoundingClientRect().bottom <= sr.bottom + 2, ids[i] + ' 开始按钮超出面板');
+    }
+    R.push('INFO | 说明面板排版已逐模块核对：' + ids.join(' / '));
+  });
 
   /* ---------- 10. 记录与清理 ---------- */
   T('训练记录已写入本地存储（每个模块各 1 条）', function () {
