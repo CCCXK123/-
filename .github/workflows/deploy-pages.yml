@@ -1,0 +1,41 @@
+name: Deploy static site to GitHub Pages
+
+# 这个项目是纯静态页面（根目录就是站点根），不需要任何构建步骤。
+# 用官方 Pages 工作流发布，比 "Deploy from branch" 更少踩坑（后者在含中文路径 /
+# 特殊文件名的仓库里偶尔会失败）。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -2,19 +2,45 @@
 
 一个**纯本地运行、零依赖**的前额叶（执行功能）训练网页。双击 `index.html` 即可使用，不需要装任何东西、不需要联网。
 
+**[🔗 在线体验](https://1iuxyqwer.github.io/prefrontal-training/)** ｜ 离线使用见下方「快速开始」
+
+> 用浏览器打开就能玩，推荐 Chrome / Edge / Firefox。
+
+---
+
+## 这是什么
+
+面向**执行功能**（前额叶的核心职能）的日常训练工具 + 科普读物，包含 6 个训练模块和 4 篇带参考文献的科普页。
+
+不是「脑力游戏合集」，而是针对三条回路设计的训练：
+
+| 回路 | 对应模块 |
+|---|---|
+| **抑制控制** | Go / No-Go、Stroop 色词干扰、旋转数字盘 |
+| **工作记忆** | N-back、旋转数字盘（记住当前该找几） |
+| **视觉搜索 + 注意分配** | 旋转数字盘、舒尔特方格 |
+
 ---
 
 ## 快速开始
 
-1. 打开 `D:\桌面\前额叶锻炼\`
-2. 双击 **`index.html`**（推荐 Chrome / Edge，其他现代浏览器均可）
+**方式一：在线玩（最省事）**
+
+<https://1iuxyqwer.github.io/prefrontal-training/>
+
+**方式二：下载到本地离线玩**
+
+1. 点右上角 `Code` → `Download ZIP`，解压
+2. 双击解压出来的 **`index.html`**
 3. 首页选择训练模块 → 选难度 → 点「开始训练」
 
-> 想更快进入某个模块：直接把 `#/wheel`、`#/schulte`、`#/nback`、`#/stroop`、`#/gonogo`、`#/selfcheck` 拼在 `index.html` 后面。
+> ⚠️ 必须**先解压**再双击。在压缩包里直接双击会白屏（加载不到 `js/`、`css/`）。
+
+> 想更快进入某个模块：直接把 `#/wheel`、`#/schulte`、`#/nback`、`#/stroop`、`#/gonogo`、`#/selfcheck` 拼在地址后面。
 
 ---
 
-## 5 个训练模块
+## 6 个训练模块
 
 | 模块 | 锻炼的执行功能 | 难度档 |
 |---|---|---|
@@ -40,9 +66,12 @@
 - **视觉搜索 + 注意分配** —— 目标一直在动，必须持续追踪；多盘模式下还要在盘与盘之间来回跳
 - **工作记忆** —— 记住「当前该找几」并同步更新
 - **抑制控制** —— 看到长得像的数字时压住「先点了再说」的冲动
-- 大师 / 炼狱档每隔几秒会**突然反转全部圆环的旋转方向**（大师 10s、炼狱 6.5s）
+
+难度设计（防预判）：
+
+- 数字的位置、以及「哪个数字在哪个盘 / 环」**全部随机**，无法靠数值预判该去哪找
+- 大师 / 炼狱档每隔几秒**突然反转全部圆环的旋转方向**（大师 10s、炼狱 6.5s）
 - 大师 / 炼狱档可开启**「随机换位」**——每隔几秒全部数字换到新位置（炼狱默认开启），刚记住的位置会失效，必须重新扫描
-- 数字的位置、以及「哪个数字在哪个盘/环」全部随机，无法靠数值预判
 
 ---
 
@@ -62,44 +91,28 @@
 - 有氧运动对**执行功能**的改善大于其他认知域（Colcombe & Kramer, 2003, 18 项 RCT 荟萃分析）
 - 6 个月有氧运动可增加前额叶灰质与白质体积（Colcombe et al., 2006）
 - 认知训练游戏**近迁移可靠**（效应量 0.5–0.8）、**远迁移证据弱**（对活跃对照组 g≈0.05）——Melby-Lervåg & Hulme 2013/2016
-- N-back 提升流体智力的原始报告（Jaeggi et al., 2008, *PNAS*）**未能被严格复现**（Redick et al., 2013）——本工具如实说明这一争议，不夸大功效
-- 前额叶是**最后成熟**的脑区（Giedd et al., 1999, *Nat. Neurosci.*；Sowell et al., 2001）；「25 岁发育完全」是流行误传，新研究提示关键塑造期延续到约 32 岁
+- N-back 提升流体智力的原始报告（Jaeggi et al., 2008, *PNAS*）**未能被严格复现**（Redick et al., 2013）
+- 前额叶是**最后成熟**的脑区（Giedd et al., 1999, *Nat. Neurosci.*；Sowell et al., 2001）
 - WHO（2020）：成人每周至少 **150 分钟**中等强度有氧活动
 
 > 本工具**不夸大、不神化**：锻炼好处页明确区分了「证据扎实」和「证据存疑」的结论，并把有氧运动排在认知训练之前。
 
 ---
 
-## 数据与隐私
-
-- 所有成绩记录存在浏览器 `localStorage`，**不上传任何服务器**
-- 记录页（`#/history`）可查看最佳成绩与历史曲线，也可逐模块清空
-- 清理浏览器数据会一并清除记录
-
----
-
-## 免责声明
-
-本工具是**认知训练与科普性质的网页应用，不是医疗器械**，不提供诊断、治疗或心理测量结论。自评量表的分数**不能用于自我诊断**。若你或家人存在明显的注意力、冲动控制或情绪调节困难，请就诊精神科 / 神经内科或咨询临床心理师。
-
----
-
-## 目录结构
+## 项目结构
 
 ```
-前额叶锻炼/
-├── index.html          入口（双击这个）
-├── css/style.css       样式系统（浅色主题）
-├── js/
-│   ├── content.js      科普内容 + 20 条参考文献 + 自评量表题库
-│   ├── ui.js           通用工具（存储、HUD、结果卡、Toast）与应用骨架
-│   ├── wheel.js        🎡 旋转数字盘
-│   ├── schulte.js      🔢 舒尔特方格
-│   ├── nback.js        🧮 N-back
-│   ├── stroop.js       🎨 Stroop
-│   ├── gonogo.js       🚦 Go / No-Go
-│   └── selfcheck.js    📝 执行功能自评
-└── dev/                开发者可选：自动化验证脚本（不影响使用）
+index.html              入口（双击即用）
+css/  style.css
+js/
+  content.js  ui.js  app.js     骨架 + 路由 + 科普内容
+  wheel.js        🎡 旋转数字盘（核心）
+  schulte.js      🔢 舒尔特方格
+  nback.js        🧮 N-back
+  stroop.js       🎨 Stroop 色词干扰
+  gonogo.js       🚦 Go / No-Go
+  selfcheck.js    📝 执行功能自评
+dev/                开发者可选：自动化验证脚本（不影响使用）
 ```
 
 技术栈：原生 HTML + CSS + JavaScript，无构建步骤、无第三方依赖、无网络请求。
@@ -109,22 +122,38 @@ Canvas 2D 负责圆盘渲染与极坐标命中判定，其余用 DOM。
 
 ## 开发者：自动化验证（可选）
 
-`dev/` 下有 36 项真实浏览器端到端检查（覆盖路由、命中判定、通关流程、结果指标、记录写入等）。
+`dev/` 下有 **52 项**真实浏览器端到端检查（`tests.js` 36 项全量 + `tests-wheel.js` 16 项转盘专项，覆盖路由、命中判定、通关流程、结果指标、难度档、随机换位、记录写入等）。
 
 ```bash
-# 1. 启动无头 Chrome（随机端口，避免连到旧实例）
-"C:/Program Files/Google/Chrome/Application/chrome.exe" \
+# 1. 启动无头浏览器（随机端口，避免连到旧实例）
+#    Chrome 或 Edge 均可（Edge 同为 Chromium 内核，CDP 完全兼容）
+"C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" \
   --headless=new --disable-gpu --remote-allow-origins='*' \
   --remote-debugging-port=9812 --user-data-dir="D:/pfc_prof" about:blank &
 
-# 2. 注入并执行测试
-PORT=9812 node dev/verify.js "file:///D:/桌面/前额叶锻炼/index.html" dev/tests.js
+# 2. 注入并执行测试（把 <项目路径> 换成你本地的实际路径）
+PORT=9812 node dev/verify.js "file:///<项目路径>/index.html" dev/tests.js
+PORT=9812 node dev/verify.js "file:///<项目路径>/index.html" dev/tests-wheel.js
 
 # 3. 截图（可选）
-PORT=9812 node dev/screenshot.js "file:///D:/桌面/前额叶锻炼/index.html" .
+PORT=9812 node dev/screenshot.js "file:///<项目路径>/index.html" .
 ```
 
-三点经验（踩过的坑）：
-- **每轮换端口 + 换 profile 目录**。若端口被上一轮的 Chrome 占用，脚本会连到旧实例，读到旧 `localStorage` 和旧缓存，结果就不可信了。
-- `dev/verify.js` 里 `Runtime.evaluate` 用的是 `awaitPromise`，所以 `dev/tests.js` 必须是一个返回字符串的 async IIFE。
-- **headless Chrome + `file://` + 中文路径偶发不加载相对子脚本**（`window.App` 未定义、DOM 为空）。规避：把项目拷到 ASCII 临时目录（如 `D:/pfc_test/`）再跑验证。
+四点经验（踩过的坑）：
+
+- **每轮换端口 + 换 profile 目录**。若端口被上一轮的浏览器占用，脚本会连到旧实例，读到旧 `localStorage` 和旧缓存，结果就不可信了。
+- `dev/verify.js` 里 `Runtime.evaluate` 用的是 `awaitPromise`，所以测试文件必须是一个返回字符串的 async IIFE。
+- **headless 浏览器 + `file://` + 中文路径偶发不加载相对子脚本**（`window.App` 未定义、DOM 为空）。规避：把项目拷到 ASCII 临时目录（如 `D:/pfc_test/`）再跑验证。
+- 用 `&` 起的无头浏览器会随该次 shell 调用结束被回收。必须把「启动浏览器 + 跑测试 + 清理」写在**同一条命令**里。
+
+---
+
+## 免责声明
+
+本项目**不是医疗器械，不构成诊断**，仅供日常认知训练与科普参考。
+
+关于「锻炼前额叶到底有没有用」：现有证据显示，**有氧运动**对执行功能的改善强于认知训练游戏（且认知训练的远迁移证据很弱）。本项目在科普页里如实区分了「证据扎实」与「证据存疑」的结论，不夸大功效。
+
+## License
+
+[MIT](LICENSE)
