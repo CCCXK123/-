@@ -2,7 +2,7 @@
 
 一个**纯本地运行、零依赖**的前额叶（执行功能）训练网页。双击 `index.html` 即可使用，不需要装任何东西、不需要联网。
 
-**[🔗 在线体验](https://1iuxyqwer.github.io/prefrontal-training/)** ｜ 离线使用见下方「快速开始」
+**[🔗 在线体验](https://cccxxk123.github.io/-/)** ｜ 离线使用见下方「快速开始」
 
 > 用浏览器打开就能玩，推荐 Chrome / Edge / Firefox。
 
@@ -26,7 +26,7 @@
 
 **方式一：在线玩（最省事）**
 
-<https://1iuxyqwer.github.io/prefrontal-training/>
+<https://cccxxk123.github.io/-/>
 
 **方式二：下载到本地离线玩**
 
